@@ -1,2 +1,0 @@
-# roomanager
-personal test project
