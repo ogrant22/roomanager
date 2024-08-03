@@ -1,9 +1,15 @@
-<h1>Register for Roomanager</h1>
-{% if registered %}
+{% extends 'app/base.html' %}
+
+{% block title_block %}
+    <h1>Register for Roomanager</h1>
+{% endblock %}
+
+{% block body_block %}
+    {% if registered %}
     <strong>thank you for registering!</strong>
     <a href = "{%url 'app:login' %}">Return to the login page.</a><br />
-{% else %}
-    <strong>registerhere!</strong><br/>
+    {% else %}
+    <strong>register here!</strong><br/>
     <form id="user_form" method="post" action="{% url 'app:register' %}" enctype="multipart/form-data">
 
         {% csrf_token %}
@@ -13,4 +19,7 @@
 
         <input type="submit" name="submit"value="Register" />
     </form>
-{% endif %}
+    {% endif %}
+
+    <a href="{% url 'app:login' %}">Login</a>
+{% endblock %}

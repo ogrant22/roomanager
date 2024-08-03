@@ -1,11 +1,12 @@
 from django.shortcuts import render
 from django.http import HttpResponse
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout 
 from django.http import HttpResponse
 from django.urls import reverse
 from django.shortcuts import redirect
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from app.models import UserProfile
+from app.models import UserProfile, Resident
 from app.forms import UserForm,UserProfileForm
 
 # Create your views here.
@@ -33,7 +34,6 @@ def loginView(request):
             context_dict = {'message': 'Incorrect details'}
             return render(request, 'app/login.html', context= context_dict)
             
-    
     else:
         context_dict = {'message': ''}
         return render(request, 'app/login.html', context=context_dict)
@@ -67,11 +67,22 @@ def register(request):
 
     return render(request, 'app/register.html', context={'user_form': user_form, 'profile_form':profile_form, 'registered':registered})
 
+@login_required
 def homepage(request, user_slug):
     currentProfile = UserProfile.objects.filter(slug = user_slug)[0]
     currentUser = currentProfile.user
+    residents = Resident.objects.filter(user = currentUser)
+    households = []
+    for r in residents:
+        households.append(r.household)
     context_dict = {'profile': currentProfile,
-                    'user': currentUser}
+                    'user': currentUser,
+                    'households' : households}
     return render(request, 'app/homepage.html', context=context_dict)
+
+@login_required
+def user_logout(request):
+    logout(request)
+    return redirect(reverse('app:login'))
 
 
