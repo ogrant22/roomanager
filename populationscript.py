@@ -20,6 +20,8 @@ def populate():
         u = User.objects.get_or_create(username = data["user"], password = data["password"], email = data["email"])[0]
         add_resident(h1, u)
         u.save()
+        p = UserProfile.objects.get_or_create(user = u)[0]
+        p.save()
         print(u)
 
 if __name__ == '__main__':

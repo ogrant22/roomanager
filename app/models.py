@@ -1,11 +1,18 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.template.defaultfilters import slugify
 
 #Password1
 # Create your models here.
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     picture = models.ImageField(upload_to='profile_images', blank=True)
+    slug = models.SlugField(unique= True, null = True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.user.username)
+        super(UserProfile, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.user.username
@@ -15,6 +22,11 @@ class Household(models.Model):
     address = models.CharField(max_length=128, unique=False, null = True)
     max_residents = models.IntegerField(default= 100)
     lead_resident = models.ForeignKey(User, on_delete=models.SET_NULL, null= True) #change later to set new lead tenant
+    slug = models.SlugField(unique= True)
+
+    def save(self, *args, **kwargs):
+        self.slug = slugify(self.name + self.pk)
+        super(Household, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -25,7 +37,7 @@ class Resident(models.Model):
     active = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.user + "/" + self.household + "/" + self.active
+        return self.user.username + "/" + self.household.name + "/" + str(self.active)
     
 class Bill(models.Model):
     name = models.CharField(max_length = 128)
@@ -36,7 +48,7 @@ class Bill(models.Model):
     household = models.ForeignKey(Household, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.name + " for " + self.household
+        return self.name + " for " + self.household.name
     
 class Chore(models.Model):
     name = models.CharField(max_length = 128)
@@ -46,7 +58,7 @@ class Chore(models.Model):
     next = models.ForeignKey(User, on_delete = models.SET_NULL, null=True)
 
     def __str__(self):
-        return self.name + " for " + self.household
+        return self.name + " for " + self.household.name
 
     
 class Event(models.Model):
